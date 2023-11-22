@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result</title>
+</head>
+<body>
+    <h2>Result</h2>
+    <p>The great circle distance is: {{ distance }} kilometers</p>
+    <iframe width="100%" height="500" src="{{ url_for('serve_static', filename=map_filename) }}"></iframe>
+    <br>
+    <a href="/">Back to Calculator</a>
+</body>
+</html>

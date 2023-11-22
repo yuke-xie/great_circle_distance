@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Great Circle Distance Calculator</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typeahead.js@0.11.1/dist/typeahead.bundle.min.js"></script>
+</head>
+<body>
+    <h1>Great Circle Distance Calculator</h1>
+    <form action="/calculate" method="post">
+        <label for="location1">Location 1:</label>
+        <input type="text" name="location1" id="location1" class="typeahead" required>
+        <label for="location2">Location 2:</label>
+        <input type="text" name="location2" id="location2" class="typeahead" required>
+        <br>
+        <button type="submit">Calculate Distance</button>
+    </form>
+
+    <script>
+        $(document).ready(function() {
+            var airportsList = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                prefetch: {
+                    url: '/autocomplete_data'  // Replace with the correct route in your Flask app
+                }
+            });
+
+            $('.typeahead').typeahead({
+                hint: true,
+                highlight: true,
+                minLength: 1
+            },
+            {
+                name: 'airportsList',
+                display: 'name',
+                source: airportsList
+            });
+        });
+    </script>
+</body>
+</html>
