@@ -78,26 +78,33 @@ def calculate():
                         line_width=0.5,
                         sizemode = 'area')))
 
-        # Set the layout to a 3D globe
+        # Calculate the midpoint coordinates
+        midpoint_lat = (airport1['lat'] + airport2['lat']) / 2
+        midpoint_lon = (airport1['lon'] + airport2['lon']) / 2
+
+        # Set the layout to a 3D globe with the calculated midpoint as the center
         fig.update_geos(
             showsubunits=True, subunitcolor="Blue",
-            showland = True,
-            showcountries = True,
-            showocean = True,
-            countrywidth = 1,
-            landcolor = 'LightYellow',
-            lakecolor = 'LightBlue',
+            showland=True,
+            showcountries=True,
+            showocean=True,
+            countrywidth=1,
+            landcolor='LightYellow',
+            lakecolor='LightBlue',
             oceancolor="LightBlue",
-            # bgcolor = 'white',
-            projection = dict(
-                type = 'orthographic',
-                rotation = dict(
-                    lon = (airport1['lon'] + airport2['lon'])/2,
-                    lat = (airport1['lat'] + airport2['lat'])/2,
-                    roll = 0
+            # bgcolor='white',
+            # center_lat=midpoint_lat,
+            # center_lon=midpoint_lon,
+            projection=dict(
+                type='orthographic',
+                rotation=dict(
+                    lon=-midpoint_lon,
+                    lat=-midpoint_lat,
+                    roll=0
                 )
             ),
         )
+
 
         fig.update_layout(
             # paper_bgcolor='white',
