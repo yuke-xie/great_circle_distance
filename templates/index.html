@@ -6,17 +6,62 @@
     <title>Great Circle Distance Calculator</title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/typeahead.js@0.11.1/dist/typeahead.bundle.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 0; /* Remove default margin */
+            height: 100vh; /* Set body height to 100% of viewport height */
+        }
+    
+        #left-container {
+            width: 20%;
+            margin-right: 10px;
+            box-sizing: border-box; /* Include padding and border in the width */
+        }
+    
+        #right-container {
+            width: 80%;
+            height: 100vh;
+            box-sizing: border-box;
+            background-color: white; /* Set the background color to black */
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            background-color: white; /* Set the background color to black */
+        }
+
+    </style>
 </head>
 <body>
-    <h1>Great Circle Distance Calculator</h1>
-    <form action="/calculate" method="post">
-        <label for="location1">Location 1:</label>
-        <input type="text" name="location1" id="location1" class="typeahead" required>
-        <label for="location2">Location 2:</label>
-        <input type="text" name="location2" id="location2" class="typeahead" required>
-        <br>
-        <button type="submit">Calculate Distance</button>
-    </form>
+    <div id="left-container">
+        <h1>Great Circle Distance Calculator</h1>
+        <form action="/calculate" method="post">
+            <label for="location1">Location 1:</label>
+            <input type="text" name="location1" id="location1" class="typeahead" required>
+            <br>
+            <label for="location2">Location 2:</label>
+            <input type="text" name="location2" id="location2" class="typeahead" required>
+            <br>
+            <button type="submit">Calculate Distance</button>
+        </form>
+
+        {% if distance is defined %}
+            <h2>Result</h2>
+            <p>The great circle distance is: <strong>{{ distance }} km</strong></p>
+        {% endif %}
+
+    </div>
+
+    <div id="right-container">
+        {% if map_filename is defined %}
+            <iframe src="{{ url_for('serve_static', filename=map_filename) }}"></iframe>
+        {% endif %}
+    </div>
 
     <script>
         $(document).ready(function() {

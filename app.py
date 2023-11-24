@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, send_file, jsonify
 from geopy.distance import geodesic
 import folium
 import os
+import plotly.graph_objects as go
+import numpy as np
 
 app = Flask(__name__)
 
@@ -16,8 +18,9 @@ airport_data = {}
 with open('GlobalAirportDatabase.txt', 'r') as file:
     for line in file:
         parts = line.strip().split(':')
-        if parts[2]=='N/A': continue
-        name = parts[2]+' ('+parts[0]+' | '+parts[1]+')'
+        if parts[2] == 'N/A':
+            continue
+        name = parts[2] + ' (' + parts[0] + ' | ' + parts[1] + ')'
         lat = dms_to_decimal(parts[5], parts[6], parts[7], parts[8])
         lon = dms_to_decimal(parts[9], parts[10], parts[11], parts[12])
         airport_data[name] = {'name': name, 'lat': lat, 'lon': lon}
@@ -45,20 +48,69 @@ def calculate():
         coords_1 = (airport1['lat'], airport1['lon'])
         coords_2 = (airport2['lat'], airport2['lon'])
 
-        distance = geodesic(coords_1, coords_2).kilometers
+        print(coords_1, coords_2)
 
-        # Create a folium map centered on the average coordinates
-        map_center = [(coords_1[0] + coords_2[0]) / 2, (coords_1[1] + coords_2[1]) / 2]
-        my_map = folium.Map(location=map_center, zoom_start=5)
+        distance = int(geodesic(coords_1, coords_2).kilometers)
+        data=go.Scattergeo(
+            lat = [airport1['lat'], airport2['lat']],
+            lon = [airport1['lon'], airport2['lon']],
+            mode = 'lines',
+            line = dict(width = 2.5, color = 'blue'),
+        )
 
-        # Plot great circle line on the map
-        folium.PolyLine([coords_1, coords_2], color='blue', weight=2.5, opacity=1).add_to(my_map)
+        fig = go.Figure(data)
+
+        fig.add_trace(go.Scattergeo(
+                    locationmode = 'USA-states',
+                    lat = [airport1['lat'], airport2['lat']],
+                    lon = [airport1['lon'], airport2['lon']],
+                    text = [airport1['name'][-4:-1], airport2['name'][-4:-1]],
+                    textfont = {"color": 'black',
+                                "family":'Times New Roman',
+                                "size":16},
+                    textposition="top center",
+                    name = "Candidate Facility",
+                    mode ="markers+text",
+                    marker = dict(
+                        size = 10,
+                        color = "black",
+                        line_color='black',
+                        line_width=0.5,
+                        sizemode = 'area')))
+
+        # Set the layout to a 3D globe
+        fig.update_geos(
+            showsubunits=True, subunitcolor="Blue",
+            showland = True,
+            showcountries = True,
+            showocean = True,
+            countrywidth = 1,
+            landcolor = 'LightYellow',
+            lakecolor = 'LightBlue',
+            oceancolor="LightBlue",
+            # bgcolor = 'white',
+            projection = dict(
+                type = 'orthographic',
+                rotation = dict(
+                    lon = (airport1['lon'] + airport2['lon'])/2,
+                    lat = (airport1['lat'] + airport2['lat'])/2,
+                    roll = 0
+                )
+            ),
+        )
+
+        fig.update_layout(
+            # paper_bgcolor='white',
+            # plot_bgcolor='white',
+            showlegend = False,
+            margin=dict(l=0, r=0, t=200, b=200, pad=0),
+        )
 
         # Save the map to a file (you can customize the filename)
         map_filename = 'great_circle_map.html'
-        my_map.save('templates/' + map_filename)
+        fig.write_html('templates/' + map_filename)
 
-        return render_template('result.html', distance=distance, map_filename=map_filename)
+        return render_template('index.html', airports=list(airport_data.values()), distance=distance, map_filename=map_filename)
 
 @app.route('/static/<filename>')
 def serve_static(filename):
